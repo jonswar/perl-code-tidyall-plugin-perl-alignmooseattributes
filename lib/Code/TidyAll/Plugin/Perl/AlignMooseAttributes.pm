@@ -23,15 +23,15 @@ sub postprocess_source {
     $source =~ s/^\# $marker //gm;
 
     # For each group of 'has' one-liners: sort, remove multiple spaces and align equal signs
-    $source =~ s/((^ has .*? \) \s* \; \s* \n)+)/process_attr_block($1)/gmex;
+    $source =~ s/((^ has \s+ \' .*? \) \s* \; \s* \n)+)/process_attr_block($1)/gmex;
 
     return $source;
 }
 
 sub process_attr_block {
     my ($block) = @_;
-    my @lines = sort( grep { /\S/ } split( "\n", $block ) );
-    my @attrs = map { /has '([^\']+)'/; $1 } @lines;
+    my @lines = grep { /\S/ } split( "\n", $block );
+    my @attrs = map { /has\s+'([^\']+)'/; $1 } @lines;
     my $max_length = max( map { length($_) } @attrs );
     foreach my $line (@lines) {
         $line =~ s/  +/ /g;
@@ -40,7 +40,7 @@ sub process_attr_block {
         $line =~ s/=> \(\s*\)/=> \(\)/;
         $line =~ s/,\s+\)/ \)/;
     }
-    return join( "", map { "$_\n" } @lines ) . "\n";
+    return join( "", sort(map { "$_\n" } @lines) ) . "\n";
 }
 
 1;
